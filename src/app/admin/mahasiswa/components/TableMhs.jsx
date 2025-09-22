@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useRef } from "react";
 import students from "@/data/mahasiswa.json";
 import { useReactToPrint } from "react-to-print";
 
@@ -37,10 +37,10 @@ export default function TableMhs() {
     D3: "D3_Manajemen_Informatika",
   };
 
-  // cetak
+  // Cetak
   const componentRef = useRef();
   const handlePrint = useReactToPrint({
-    contentRef: componentRef, // tetap pakai contentRef
+    content: () => componentRef.current,
     documentTitle: selectedStudent
       ? `${selectedStudent.name.replace(/\s+/g, "_")}_${
           prodiMap[selectedStudent.prodi] || selectedStudent.prodi
@@ -48,8 +48,13 @@ export default function TableMhs() {
       : "CV_Mahasiswa",
   });
 
+  // Fungsi cetak
   const openCetak = (student) => {
     setSelectedStudent(student);
+    // Gunakan timeout 0ms agar rendering CV selesai sebelum print
+    setTimeout(() => {
+      handlePrint();
+    }, 0);
   };
 
   const openTambah = () => setIsTambahOpen(true);
@@ -93,11 +98,10 @@ export default function TableMhs() {
     });
   };
 
-  // filter data
+  // Filter data
   const filteredStudents = studentsData.filter((s) => {
     const matchSearch =
-      s.name.toLowerCase().includes(search.toLowerCase()) ||
-      s.nim.includes(search);
+      s.name.toLowerCase().includes(search.toLowerCase()) || s.nim.includes(search);
     let matchPoin = true;
     if (filterPoin === "nol") matchPoin = s.poin === 0;
     if (filterPoin === "<5") matchPoin = s.poin > 0 && s.poin < 5;
@@ -111,13 +115,6 @@ export default function TableMhs() {
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
   const currentItems = filteredStudents.slice(startIndex, endIndex);
-
-  // setelah selectedStudent diset, baru panggil print
-  useEffect(() => {
-    if (selectedStudent && componentRef.current) {
-      handlePrint();
-    }
-  }, [selectedStudent]);
 
   return (
     <div className="bg-white rounded-xl shadow-md border border-gray-100 overflow-hidden">
