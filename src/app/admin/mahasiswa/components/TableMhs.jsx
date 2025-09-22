@@ -1,60 +1,84 @@
 "use client";
-import React, { useState, useRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import students from "@/data/mahasiswa.json";
 import { useReactToPrint } from "react-to-print";
 
-// Sub-component
 import TableToolbar from "./TableToolbar";
 import TableDesktop from "./TableDesktop";
 import TableMobile from "./TableMobile";
 import TablePagination from "@/components/Pagianation";
 import CetakCV from "./CetakCV";
 
-// Modal
 import DetailModal from "./ModalDetail";
 import ModalTambahMhs from "./Tambah";
 import ModalEdit from "./Edit";
 
-// Toast
 import { useToast } from "@/components/Toats";
 
 export default function TableMhs() {
   const { addToast } = useToast();
   const [studentsData, setStudentsData] = useState(students);
+  const [selectedStudent, setSelectedStudent] = useState(null);
+  const [isReadyToPrint, setIsReadyToPrint] = useState(false);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedStudent, setSelectedStudent] = useState(null);
-
   const [isTambahOpen, setIsTambahOpen] = useState(false);
   const [isEditOpen, setIsEditOpen] = useState(false);
 
   const [search, setSearch] = useState("");
   const [filterPoin, setFilterPoin] = useState("all");
 
-  // Mapping prodi untuk nama file
   const prodiMap = {
     S1: "S1_Teknik_Informatika",
     D3: "D3_Manajemen_Informatika",
   };
 
-  // Cetak
   const componentRef = useRef();
+
+  // Perbaikan: Gunakan contentRef dan pastikan ada fallback
   const handlePrint = useReactToPrint({
-    content: () => componentRef.current,
+    contentRef: componentRef, // Gunakan contentRef bukan content
     documentTitle: selectedStudent
       ? `${selectedStudent.name.replace(/\s+/g, "_")}_${
           prodiMap[selectedStudent.prodi] || selectedStudent.prodi
         }`
       : "CV_Mahasiswa",
+    onBeforeGetContent: () => {
+      // Pastikan selectedStudent ada sebelum print
+      return Promise.resolve();
+    },
+    onAfterPrint: () => {
+      // Reset state setelah print selesai
+      setIsReadyToPrint(false);
+    },
   });
 
-  // Fungsi cetak
+  // Trigger print ketika CV sudah siap
+  useEffect(() => {
+    if (isReadyToPrint && selectedStudent && componentRef.current) {
+      // Beri sedikit delay untuk memastikan component sudah ter-render
+      const timer = setTimeout(() => {
+        handlePrint();
+      }, 100);
+
+      return () => clearTimeout(timer);
+    }
+  }, [isReadyToPrint, selectedStudent, handlePrint]);
+
   const openCetak = (student) => {
+    if (!student) {
+      addToast({
+        message: "Data mahasiswa tidak valid",
+        type: "error",
+      });
+      return;
+    }
+
     setSelectedStudent(student);
-    // Gunakan timeout 0ms agar rendering CV selesai sebelum print
+    // Beri sedikit delay untuk memastikan state ter-update
     setTimeout(() => {
-      handlePrint();
-    }, 0);
+      setIsReadyToPrint(true);
+    }, 50);
   };
 
   const openTambah = () => setIsTambahOpen(true);
@@ -98,10 +122,11 @@ export default function TableMhs() {
     });
   };
 
-  // Filter data
+  // filter data
   const filteredStudents = studentsData.filter((s) => {
     const matchSearch =
-      s.name.toLowerCase().includes(search.toLowerCase()) || s.nim.includes(search);
+      s.name.toLowerCase().includes(search.toLowerCase()) ||
+      s.nim.includes(search);
     let matchPoin = true;
     if (filterPoin === "nol") matchPoin = s.poin === 0;
     if (filterPoin === "<5") matchPoin = s.poin > 0 && s.poin < 5;
@@ -127,7 +152,7 @@ export default function TableMhs() {
         onAdd={openTambah}
       />
 
-      {/* Table Desktop */}
+      {/* Table */}
       <TableDesktop
         students={currentItems}
         openDetail={openDetail}
@@ -135,8 +160,6 @@ export default function TableMhs() {
         onEdit={openEdit}
         onDelete={handleDelete}
       />
-
-      {/* Table Mobile */}
       <TableMobile
         students={currentItems}
         openDetail={openDetail}
@@ -173,13 +196,15 @@ export default function TableMhs() {
         onSubmit={handleUpdate}
       />
 
-      {/* Area cetak (hidden) */}
+      {/* Hidden CV area - Pastikan selalu ada content */}
       <div style={{ display: "none" }}>
-        {selectedStudent && (
-          <div ref={componentRef}>
+        <div ref={componentRef}>
+          {selectedStudent ? (
             <CetakCV mahasiswa={selectedStudent} />
-          </div>
-        )}
+          ) : (
+            <div>Loading CV...</div>
+          )}
+        </div>
       </div>
     </div>
   );
