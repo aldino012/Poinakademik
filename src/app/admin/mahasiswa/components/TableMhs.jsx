@@ -64,68 +64,6 @@ export default function TableMhs() {
     setPrintRequested(true);
   };
 
-  // useEffect untuk menunggu render <CetakCV> lalu panggil handlePrint
-  useEffect(() => {
-    if (!printRequested || !selectedStudent) return;
-
-    let cancelled = false;
-    let tries = 0;
-    const maxTries = 30; // max 30 * interval ms (misal 30 * 100ms = 3s)
-    const interval = 100; // ms
-
-    const attemptPrint = () => {
-      if (cancelled) return;
-      tries += 1;
-
-      const container = componentRef.current;
-      // cek apakah CetakCV sudah ter-render — CetakCV root punya className="page"
-      const printableElement =
-        container &&
-        container.querySelector &&
-        container.querySelector(".page");
-
-      if (printableElement) {
-        try {
-          // beberapa versi react-to-print menerima optional content param.
-          // kita pass function agar pasti menunjuk ke node yang sudah ada.
-          handlePrint(() => container);
-        } catch (err) {
-          // fallback: coba tanpa param
-          try {
-            handlePrint();
-          } catch (err2) {
-            console.error("Print failed:", err2);
-            addToast({
-              message: `Gagal mencetak: ${err2?.message || "Unknown error"}`,
-              type: "error",
-            });
-          }
-        } finally {
-          setPrintRequested(false);
-        }
-      } else if (tries < maxTries) {
-        // tunggu sebentar lalu coba lagi
-        setTimeout(attemptPrint, interval);
-      } else {
-        // gagal menemukan konten setelah beberapa percobaan
-        setPrintRequested(false);
-        console.error("Timeout: printable content not found");
-        addToast({
-          message:
-            "Gagal memuat CV untuk dicetak. Silakan reload halaman lalu coba lagi.",
-          type: "error",
-        });
-      }
-    };
-
-    // mulai coba beberapa ms setelah selectedStudent di-set agar re-render terjadi
-    setTimeout(attemptPrint, 50);
-
-    return () => {
-      cancelled = true;
-    };
-  }, [printRequested, selectedStudent, handlePrint, addToast]);
-
   const openTambah = () => setIsTambahOpen(true);
   const closeTambah = () => setIsTambahOpen(false);
 
@@ -181,10 +119,7 @@ export default function TableMhs() {
 
   const itemsPerPage = 10;
   const [currentPage, setCurrentPage] = useState(1);
-  const totalPages = Math.max(
-    1,
-    Math.ceil(filteredStudents.length / itemsPerPage)
-  );
+  const totalPages = Math.ceil(filteredStudents.length / itemsPerPage) || 1;
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
   const currentItems = filteredStudents.slice(startIndex, endIndex);
