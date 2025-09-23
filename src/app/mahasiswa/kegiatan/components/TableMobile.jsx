@@ -59,21 +59,6 @@ export default function TableMobile({
                 </p>
               </div>
 
-              {/* Bukti Kegiatan */}
-              {kegiatan?.bukti && (
-                <div className="mt-3">
-                  <a
-                    href={kegiatan.bukti}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-xs text-blue-600 hover:underline flex items-center gap-1"
-                  >
-                    <i className="fas fa-file-pdf text-red-500"></i>
-                    Lihat Bukti (PDF)
-                  </a>
-                </div>
-              )}
-
               {/* Status */}
               <div className="mt-3 flex flex-wrap gap-2">
                 <span

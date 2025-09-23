@@ -8,15 +8,8 @@ export default function TableDesktop({
   openDetailModalDesktop,
 }) {
   const handleDetailClick = (claim) => {
-    if (typeof window !== "undefined") {
-      if (window.innerWidth < 1024) {
-        // Tablet & mobile → buka tab baru
-        window.open(claim.informasi_kegiatan?.bukti || "/dumy.pdf", "_blank");
-      } else {
-        // Desktop → buka modal
-        openDetailModalDesktop(claim);
-      }
-    }
+    // Semua perangkat → buka modal, tidak ada lagi window.open
+    openDetailModalDesktop(claim);
   };
 
   return (
@@ -79,14 +72,7 @@ export default function TableDesktop({
                 </td>
                 <td className="px-4 py-3 text-center">
                   {claim.informasi_kegiatan?.bukti ? (
-                    <a
-                      href={claim.informasi_kegiatan?.bukti}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-blue-600 hover:underline"
-                    >
-                      Lihat
-                    </a>
+                    <span className="text-blue-600">Tersedia</span>
                   ) : (
                     "-"
                   )}

@@ -125,13 +125,6 @@ export default function KegiatanMhs() {
   // Render hanya di client
   useEffect(() => setMounted(true), []);
 
-  // Mobile: buka pdf
-  const handleMobileDetail = (claim) => {
-    if (typeof window !== "undefined") {
-      window.open(claim.informasi_kegiatan?.bukti || "/dumy.pdf", "_blank");
-    }
-  };
-
   return (
     <div>
       {/* Card utama */}
@@ -185,7 +178,7 @@ export default function KegiatanMhs() {
         <TableMobile
           currentClaims={currentClaims}
           statusColors={statusColors}
-          openDetailModal={handleMobileDetail}
+          openDetailModal={openDetailModal} // <-- Sama seperti desktop
         />
       </div>
 

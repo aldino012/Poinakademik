@@ -3,7 +3,7 @@
 import React from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
-export default function UserDetailModal({ isOpen, onClose, data }) {
+export default function ModalDetail({ isOpen, onClose, data }) {
   if (!isOpen || !data) return null;
 
   const statusColors = {
@@ -56,21 +56,21 @@ export default function UserDetailModal({ isOpen, onClose, data }) {
                       <i className="fas fa-calendar-alt text-blue-600 mr-2"></i>
                       Tanggal Pengajuan:
                     </span>{" "}
-                    {kegiatan.tanggal_pengajuan}
+                    {kegiatan.tanggal_pengajuan || "-"}
                   </p>
                   <p>
                     <span className="font-semibold">
                       <i className="fas fa-calendar-check text-blue-600 mr-2"></i>
                       Tanggal Pelaksanaan:
                     </span>{" "}
-                    {kegiatan.tanggal_pelaksanaan}
+                    {kegiatan.tanggal_pelaksanaan || "-"}
                   </p>
                   <p>
                     <span className="font-semibold">
                       <i className="fas fa-tag text-blue-600 mr-2"></i>
                       Jenis Kegiatan:
                     </span>{" "}
-                    {kegiatan.jenis_kegiatan}
+                    {kegiatan.jenis_kegiatan || "-"}
                   </p>
                 </div>
 
@@ -82,11 +82,12 @@ export default function UserDetailModal({ isOpen, onClose, data }) {
                     </span>{" "}
                     <span
                       className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium ${
-                        statusColors[kegiatan.status_bem]
+                        statusColors[kegiatan.status_bem] ||
+                        "bg-gray-100 text-gray-700"
                       }`}
                     >
                       <i className="fas fa-circle text-[8px]"></i>
-                      {kegiatan.status_bem}
+                      {kegiatan.status_bem || "-"}
                     </span>
                   </p>
                   <p>
@@ -96,11 +97,12 @@ export default function UserDetailModal({ isOpen, onClose, data }) {
                     </span>{" "}
                     <span
                       className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium ${
-                        statusColors[kegiatan.status_kemahasiswaan]
+                        statusColors[kegiatan.status_kemahasiswaan] ||
+                        "bg-gray-100 text-gray-700"
                       }`}
                     >
                       <i className="fas fa-circle text-[8px]"></i>
-                      {kegiatan.status_kemahasiswaan}
+                      {kegiatan.status_kemahasiswaan || "-"}
                     </span>
                   </p>
                 </div>
@@ -111,7 +113,7 @@ export default function UserDetailModal({ isOpen, onClose, data }) {
                 <i className="fas fa-star text-blue-600 text-lg"></i>
                 <p className="font-semibold">Poin Diperoleh:</p>
                 <span className="text-lg font-bold text-gray-800">
-                  {kegiatan.poin}
+                  {kegiatan.poin || 0}
                 </span>
               </div>
 
@@ -122,12 +124,26 @@ export default function UserDetailModal({ isOpen, onClose, data }) {
                     <i className="fas fa-file-pdf text-red-600"></i>
                     Bukti Kegiatan
                   </h4>
-                  <div className="w-full h-[55vh] border rounded-lg shadow-sm overflow-hidden">
+
+                  {/* Desktop → preview pdf */}
+                  <div className="hidden md:block w-full h-[55vh] border rounded-lg shadow-sm overflow-hidden">
                     <iframe
                       src={`${kegiatan.bukti}#view=FitH&scrollbar=1`}
                       title="Bukti Kegiatan"
                       className="w-full h-full"
                     />
+                  </div>
+
+                  {/* Mobile → tombol download */}
+                  <div className="block md:hidden">
+                    <a
+                      href={kegiatan.bukti}
+                      download
+                      className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700 transition"
+                    >
+                      <i className="fas fa-download"></i>
+                      Download Bukti
+                    </a>
                   </div>
                 </div>
               )}

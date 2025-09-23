@@ -160,10 +160,27 @@ export default function DetailKlaimModal({ isOpen, onClose, claim }) {
                   Bukti Poin:
                 </label>
                 {kegiatan.bukti_poin ? (
-                  <iframe
-                    src={kegiatan.bukti_poin}
-                    className="w-full h-60 border rounded-lg"
-                  />
+                  <>
+                    {/* ✅ Mobile → tombol download */}
+                    <div className="block md:hidden">
+                      <a
+                        href={kegiatan.bukti_poin}
+                        download
+                        className="inline-flex items-center px-3 py-2 bg-blue-100 text-blue-700 rounded-lg text-sm hover:bg-blue-200 transition"
+                      >
+                        <i className="fas fa-file-download mr-2"></i>
+                        Download Bukti (PDF)
+                      </a>
+                    </div>
+
+                    {/* ✅ Desktop → preview iframe */}
+                    <div className="hidden md:block">
+                      <iframe
+                        src={kegiatan.bukti_poin}
+                        className="w-full h-60 border rounded-lg"
+                      />
+                    </div>
+                  </>
                 ) : (
                   <p className="text-sm text-gray-500">Belum ada bukti PDF.</p>
                 )}

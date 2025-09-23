@@ -1,5 +1,6 @@
 "use client";
 import React from "react";
+
 export default function TableDesktop({
   currentClaims,
   startIndex,
@@ -7,16 +8,11 @@ export default function TableDesktop({
   openDetailModal,
   handleDelete,
 }) {
-  // Fungsi handle klik detail
+  // Fungsi handle klik detail → selalu buka modal
   const handleDetailClick = (claim) => {
-    if (typeof window !== "undefined" && window.innerWidth < 768) {
-      // Mobile → buka dummy.pdf di tab baru
-      window.open("/dumy.pdf", "_blank");
-    } else {
-      // Desktop → buka modal detail
-      openDetailModal(claim);
-    }
+    openDetailModal(claim);
   };
+
   return (
     <>
       <style jsx>{`
@@ -35,6 +31,7 @@ export default function TableDesktop({
           opacity: 0;
         }
       `}</style>
+
       <div className="hidden lg:block overflow-x-auto rounded-xl shadow-lg border border-gray-100">
         <table className="w-full text-left text-sm">
           {/* Header */}
@@ -56,7 +53,8 @@ export default function TableDesktop({
                 <i className="fas fa-calendar-alt mr-2 text-sm"></i>Pengajuan
               </th>
               <th className="px-4 py-3 font-medium">
-                <i className="fas fa-calendar-check mr-2 text-sm"></i>Pelaksanaan
+                <i className="fas fa-calendar-check mr-2 text-sm"></i>
+                Pelaksanaan
               </th>
               <th className="px-4 py-3 font-medium">
                 <i className="fas fa-list-alt mr-2 text-sm"></i>Kegiatan
@@ -69,6 +67,7 @@ export default function TableDesktop({
               </th>
             </tr>
           </thead>
+
           {/* Body */}
           <tbody className="divide-y divide-gray-200">
             {currentClaims && currentClaims.length > 0 ? (
@@ -76,7 +75,7 @@ export default function TableDesktop({
                 <tr
                   key={idx}
                   className="hover:bg-blue-50/60 transition-colors duration-150 animate-slide-in"
-                  style={{ 
+                  style={{
                     animationDelay: `${idx * 0.1}s`,
                   }}
                 >
@@ -151,7 +150,10 @@ export default function TableDesktop({
               ))
             ) : (
               <tr>
-                <td colSpan="9" className="text-center text-gray-500 py-6 italic">
+                <td
+                  colSpan="9"
+                  className="text-center text-gray-500 py-6 italic"
+                >
                   Tidak ada data ditemukan.
                 </td>
               </tr>
