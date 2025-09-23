@@ -1,6 +1,7 @@
 "use client";
 import React, { useRef } from "react";
 import { useReactToPrint } from "react-to-print";
+import "./CetakCV.css";
 
 const CetakCV = ({ mahasiswa }) => {
   const componentRef = useRef();
