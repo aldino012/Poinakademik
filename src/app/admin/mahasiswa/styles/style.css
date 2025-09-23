@@ -1,17 +1,30 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
-/* --- Page Setup --- */
 @page {
   size: A4;
   margin: 0;
 }
 
-body {
-  font-family: 'Inter', sans-serif;
-  margin: 0;
+@media print {
+  body {
+    margin: 0;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  .page {
+    width: 210mm;
+    height: 297mm;
+    margin: 0;
+    padding: 0;
+    box-shadow: none;
+    overflow: hidden;
+  }
 }
 
-/* --- General Page --- */
+body {
+  font-family: 'Inter', sans-serif;
+}
+
 .page {
   width: 210mm;
   height: 297mm;
@@ -24,58 +37,35 @@ body {
   position: relative;
 }
 
+.page::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 200px;
+  height: 200px;
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(99, 102, 241, 0.05) 100%);
+  border-radius: 50%;
+  transform: translate(50%, -50%);
+  z-index: 0;
+}
+
 .content {
   flex: 1;
 }
 
-/* --- Print Styles --- */
-@media print {
-  body * {
-    visibility: hidden; /* sembunyikan semua elemen selain .page */
-  }
-
-  .page, .page * {
-    visibility: visible;
-  }
-
-  .page {
-    position: absolute;
-    left: 0;
-    top: 0;
-    width: 210mm;
-    height: 297mm;
-    margin: 0;
-    padding: 0;
-    box-shadow: none;
-    overflow: visible;
-    page-break-after: always;
-  }
-
-  /* Hilangkan tombol cetak di print */
-  button {
-    display: none !important;
-  }
-
-  /* Pastikan semua gambar terlihat */
-  img {
-    -webkit-print-color-adjust: exact;
-    print-color-adjust: exact;
-    max-width: 100% !important;
-    height: auto !important;
-  }
-
-  /* Grid dan flex tetap konsisten di print */
-  .grid, .flex {
-    display: block !important;
-  }
+.signature-section-wrapper {
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  border-top: 3px solid #1d4ed8;
+  padding: 16px 16px 24px 16px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
 }
 
-/* --- Header --- */
 .header-bg {
   background: linear-gradient(135deg, #1d4ed8 0%, #2563eb 50%, #3b82f6 100%);
   position: relative;
-  padding: 1.5rem;
-  color: white;
 }
 
 .header-bg::after {
@@ -86,16 +76,6 @@ body {
   width: 100%;
   height: 20px;
   background: linear-gradient(135deg, transparent 0%, rgba(255,255,255,0.1) 50%, transparent 100%);
-}
-
-/* --- Signature --- */
-.signature-section-wrapper {
-  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
-  border-top: 3px solid #1d4ed8;
-  padding: 16px;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
 }
 
 .signature-wrapper {
@@ -126,7 +106,6 @@ body {
   z-index: 5;
 }
 
-/* --- Section Titles --- */
 .section-title {
   display: flex;
   align-items: center;
@@ -134,6 +113,7 @@ body {
   color: #1d4ed8;
   font-weight: 600;
   margin-bottom: 0.75rem;
+  position: relative;
 }
 
 .section-title i {
@@ -158,7 +138,6 @@ body {
   border-radius: 1px;
 }
 
-/* --- Profile Photo --- */
 .profile-photo {
   border: 4px solid white;
   box-shadow: 0 4px 15px rgba(0,0,0,0.2);
@@ -166,12 +145,14 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
+  color: #6b7280;
+  font-size: 12px;
 }
 
-/* --- Biodata --- */
 .biodata-grid div {
   padding: 4px 0;
   border-bottom: 1px solid #f1f5f9;
+  transition: background-color 0.2s ease;
 }
 
 .biodata-grid div:hover {
@@ -179,7 +160,6 @@ body {
   padding-left: 4px;
 }
 
-/* --- List Items --- */
 .list-item {
   position: relative;
   padding-left: 0;
@@ -196,15 +176,24 @@ body {
   height: 6px;
   background: linear-gradient(135deg, #1d4ed8, #3b82f6);
   border-radius: 50%;
+  box-shadow: 0 2px 4px rgba(29, 78, 216, 0.3);
 }
 
-/* --- Placeholder --- */
-.placeholder-item {
-  font-style: italic;
-  color: #9ca3af;
+.signature-column {
+  position: relative;
+  background: white;
+  border-radius: 6px;
+  padding: 14px 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  border: 1px solid #f1f5f9;
 }
 
-/* --- Contact Info --- */
+.signature-column:hover {
+  box-shadow: 0 4px 12px rgba(29, 78, 216, 0.1);
+  transform: translateY(-1px);
+  transition: all 0.2s ease;
+}
+
 .contact-info {
   background: rgba(255,255,255,0.1);
   padding: 8px 12px;
@@ -212,7 +201,6 @@ body {
   border: 1px solid rgba(255,255,255,0.2);
 }
 
-/* --- Achievement & Organization Items --- */
 .achievement-item, .organization-item {
   background: linear-gradient(135deg, #fefefe 0%, #f9fafb 100%);
   border-left: 3px solid #3b82f6;
@@ -220,4 +208,33 @@ body {
   margin: 4px 0;
   border-radius: 0 6px 6px 0;
   box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+.achievement-item:hover, .organization-item:hover {
+  background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+  transform: translateX(2px);
+  transition: all 0.2s ease;
+}
+
+/* Placeholder jika tidak ada data prestasi/organisasi */
+.placeholder-item {
+  background: linear-gradient(135deg, #fefefe 0%, #f9fafb 100%);
+  border-left: 3px solid #3b82f6;
+  padding: 8px 12px;
+  margin: 4px 0;
+  border-radius: 0 6px 6px 0;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  font-style: italic;
+  color: #9ca3af;
+}
+
+.date-location {
+  color: #1d4ed8;
+  font-weight: 500;
+  background: linear-gradient(135deg, #eff6ff, #dbeafe);
+  padding: 4px 12px;
+  border-radius: 20px;
+  display: inline-block;
+  font-size: 13px;
+  box-shadow: 0 2px 4px rgba(29, 78, 216, 0.1);
 }

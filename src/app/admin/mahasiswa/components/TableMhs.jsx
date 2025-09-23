@@ -28,6 +28,7 @@ export default function TableMhs() {
   const [search, setSearch] = useState("");
   const [filterPoin, setFilterPoin] = useState("all");
 
+  // Flag untuk request cetak (dipisah dari selectedStudent agar kontrol lebih jelas)
   const [printRequested, setPrintRequested] = useState(false);
 
   const prodiMap = {
@@ -35,20 +36,25 @@ export default function TableMhs() {
     D3: "D3_Manajemen_Informatika",
   };
 
+  // ref container yang akan diprint (wrapper yang selalu ada)
   const componentRef = useRef(null);
 
+  // handler dari react-to-print (tidak memanggilnya langsung di openCetak)
   const handlePrint = useReactToPrint({
     content: () => componentRef.current,
+    // documentTitle ditentukan di sini — walau jika mau dinamis bisa di-set ke generic
     documentTitle: selectedStudent
       ? `${selectedStudent.name.replace(/\s+/g, "_")}_${
           prodiMap[selectedStudent?.prodi] || selectedStudent?.prodi
         }`
       : "CV_Mahasiswa",
     onAfterPrint: () => {
+      // bersihkan selectedStudent setelah cetak
       setSelectedStudent(null);
     },
   });
 
+  // ketika user klik tombol Cetak -> set data dan tandai sebagai requested
   const openCetak = (student) => {
     if (!student) {
       addToast({ message: "Data mahasiswa tidak valid", type: "error" });
@@ -58,17 +64,67 @@ export default function TableMhs() {
     setPrintRequested(true);
   };
 
-  // useEffect menunggu render CetakCV lalu panggil handlePrint
+  // useEffect untuk menunggu render <CetakCV> lalu panggil handlePrint
   useEffect(() => {
     if (!printRequested || !selectedStudent) return;
 
-    const timer = setTimeout(() => {
-      handlePrint();
-      setPrintRequested(false);
-    }, 200); // tunggu 200ms agar CetakCV render
+    let cancelled = false;
+    let tries = 0;
+    const maxTries = 30; // max 30 * interval ms (misal 30 * 100ms = 3s)
+    const interval = 100; // ms
 
-    return () => clearTimeout(timer);
-  }, [printRequested, selectedStudent, handlePrint]);
+    const attemptPrint = () => {
+      if (cancelled) return;
+      tries += 1;
+
+      const container = componentRef.current;
+      // cek apakah CetakCV sudah ter-render — CetakCV root punya className="page"
+      const printableElement =
+        container &&
+        container.querySelector &&
+        container.querySelector(".page");
+
+      if (printableElement) {
+        try {
+          // beberapa versi react-to-print menerima optional content param.
+          // kita pass function agar pasti menunjuk ke node yang sudah ada.
+          handlePrint(() => container);
+        } catch (err) {
+          // fallback: coba tanpa param
+          try {
+            handlePrint();
+          } catch (err2) {
+            console.error("Print failed:", err2);
+            addToast({
+              message: `Gagal mencetak: ${err2?.message || "Unknown error"}`,
+              type: "error",
+            });
+          }
+        } finally {
+          setPrintRequested(false);
+        }
+      } else if (tries < maxTries) {
+        // tunggu sebentar lalu coba lagi
+        setTimeout(attemptPrint, interval);
+      } else {
+        // gagal menemukan konten setelah beberapa percobaan
+        setPrintRequested(false);
+        console.error("Timeout: printable content not found");
+        addToast({
+          message:
+            "Gagal memuat CV untuk dicetak. Silakan reload halaman lalu coba lagi.",
+          type: "error",
+        });
+      }
+    };
+
+    // mulai coba beberapa ms setelah selectedStudent di-set agar re-render terjadi
+    setTimeout(attemptPrint, 50);
+
+    return () => {
+      cancelled = true;
+    };
+  }, [printRequested, selectedStudent, handlePrint, addToast]);
 
   const openTambah = () => setIsTambahOpen(true);
   const closeTambah = () => setIsTambahOpen(false);
@@ -188,8 +244,8 @@ export default function TableMhs() {
         onSubmit={handleUpdate}
       />
 
-      {/* Hidden CV area: tetap di DOM tapi tidak terlihat di layar */}
-      <div className="printable-wrapper">
+      {/* Hidden CV area (wrapper selalu ada; CetakCV dirender ketika selectedStudent ada) */}
+      <div style={{ visibility: "hidden", height: 0, overflow: "hidden" }}>
         <div ref={componentRef}>
           {selectedStudent ? <CetakCV mahasiswa={selectedStudent} /> : null}
         </div>
